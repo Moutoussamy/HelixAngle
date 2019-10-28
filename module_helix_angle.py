@@ -4,7 +4,7 @@
 
 """
 This script permit to calculate differetns angles between alpha-helix from a
-PDB file or a MD simulation (CHARMM or GROMACS). 
+PDB file or a MD simulation (CHARMM or GROMACS).
 The differents angles are :
 	- helix - helix angle
 	- helix - helix bundle angle
@@ -70,8 +70,8 @@ def PDBHelix_vs_helix(pdb,limits_file = 0):
 
 def PDBHelix_vs_helixBunble(pdb,limits_file = 0):
 	"""
-	Allows to compute the angle between an helix and the protein axis on a pdb 
-	file. 
+	Allows to compute the angle between an helix and the protein axis on a pdb
+	file.
 	Args : a pdb file and a limits file (optional)
 	Return : a file which contain all the angle calculation
 	"""
@@ -112,7 +112,7 @@ def PDBhelix_torsion_angle(pdb,limits_file = 0):
 
 	list_helix = fct.search_helix(pdb,ss) # extract helix from a pdb
 	fct.print_limits(list_helix) # print and write the helix position
-	contact = fct.WhichIsInContact(list_helix)# Compute which helix is in contact 
+	contact = fct.WhichIsInContact(list_helix)# Compute which helix is in contact
 	fct.get_inertie_mtx(list_helix) # compute the inertia matrix
 	fct.helix_evec(list_helix) # Compute the eigen vectors for each helix
 	output = open("torsion_angle.dat","w")
@@ -139,14 +139,14 @@ def PDBhelix_torsion_angle(pdb,limits_file = 0):
 
 def MDhelix_vs_helix(top,traj,output = 0,limits = 0):
 	"""
-	Compute the helix - helix angle during a MD simulation. 
+	Compute the helix - helix angle during a MD simulation.
 	If output = "w", an output file is write.
 	Args : a topology, a trajectory file and an output (optional)
 	Return : a numpy matrix which contain all angle and a list which contain all
 	angle couple.
 	"""
 	#mk a directory and compute the number of frame in the trajectory:
-	last_frame,dir_name = fct.get_pdb(top,traj)
+	last_frame,dir_name = fct.get_pdb(top,traj) #number of frame
 
 	row = 0
 	if output == "w":
@@ -190,7 +190,7 @@ def MDhelix_vs_helix(top,traj,output = 0,limits = 0):
 
 def MDhelix_vs_helixbundle(top,traj,output = 0,limits = 0):
 	"""
-	Compute the helix - helix bundle angle during a MD simulation. 
+	Compute the helix - helix bundle angle during a MD simulation.
 	If output = "w", an output file is write.
 	Args : a topology, a trajectory file and an output (optional)
 	Return : a numpy matrix which contain all angle and a list which contain all
@@ -242,7 +242,7 @@ def MDhelix_torsion_angle(top,traj,output = 0):
 	#mk a directory and compute the number of frame in the trajectory:
 	last_frame,dirname = fct.get_pdb(top,traj)
 	row = 0
-	if output == "w":	
+	if output == "w":
 		output = open('results_helix_torsion_angle.dat','w')
 
 	for i in range(last_frame):
@@ -283,13 +283,13 @@ def plot_all(results_mtx,names,dir_name = "plot"):
 	Args : the results matrix, a list which contain the name of the different
 	angle and a directory name.
 	"""
-	dir_name = fct.mk_directory(dir_name) # Make a directory 
+	dir_name = fct.mk_directory(dir_name) # Make a directory
 	col = results_mtx.shape[1]
 	for i in range(col):
 		print "Writting graphic %s"%names[i]
 		val = results_mtx[:,i]
 		mean = np.mean(val)
-		plt.plot(range(len(val)),val,'.',color = "k") # plot 
+		plt.plot(range(len(val)),val,'.',color = "k") # plot
 		plt.title("%s (mean angle = %.2f degree)"%(names[i],mean)) # add title
 		plt.ylabel("angle (degrees)") # add y label
 		plt.xlabel("Time step") # add x label
@@ -301,7 +301,7 @@ def plot_all(results_mtx,names,dir_name = "plot"):
 def plot_angle(angle,names,results_mtx):
 	"""
 	Write just one angle.
-	Args : an angle name such as 'H1-H2' and a list which contain the name of the 
+	Args : an angle name such as 'H1-H2' and a list which contain the name of the
 	different angle and the results matrix.
 	"""
 	col = "null"
