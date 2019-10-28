@@ -13,8 +13,8 @@ import sys
 ################################################################################
 
 
-# the limits list contain on each tuples, the first and the last atom of an 
-# helix. If you want to compute angles for all helix in the protein, remove 
+# the limits list contain on each tuples, the first and the last atom of an
+# helix. If you want to compute angles for all helix in the protein, remove
 # "limits" in the command line.
 
 limits = [(656,891),(1884,2194),(2382,2598)]
@@ -36,8 +36,7 @@ mha.PDBHelix_vs_helix("data/1H6I.pdb")
 #---------------Computes angles during a MD simulation:-------------------------
 
 ## CAUTION : if you to use the next functions you must have 1HI.gro
-## and 1H6I_traj.xtc in data. You can dowload these files on this link:
-## http://www.dsimb.inserm.fr/~santuz/projet_court_helices/
+## and 1H6I_traj.xtc in data. 
 
 ## For all the calculation during the MDsimulation, the results is write on an
 ## output file. If you don't want to write this file remove the "w" in the command
