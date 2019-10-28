@@ -1,0 +1,240 @@
+#!/usr/bin/env python
+# ~*~ coding:utf-8 ~*~
+
+
+"""
+This script permit to calculate differetns angles between alpha-helix from a
+PDB file or a MD simulation (CHARMM or GROMACS). 
+The differents angles are :
+	- helix - helix angle
+	- helix - helix bundle angle
+	- helix - helix torsion angle
+"""
+from lib.function_helix_angle import *
+
+__author__ = "Emmanuel Edouard MOUTOUSSAMY"
+__version__  = "1.0.0"
+__date__ = "2015/09"
+__copyright__ = "CC_by_SA"
+__dependencies__ = "os, sys, numpy, math, matplotlib, MDAnalysis"
+
+
+
+def PDBHelix_vs_helix(pdb,limits_file = 0):
+	"""
+	Compute the angle between for all combination of two diffrents helix.
+	all the results is write on an output file.
+	Args : a pdb file and a limits file (optional)
+	"""
+	if limits_file == 0:
+		ss = secondary_structure(pdb)
+	else:
+		ss = read_ss(limits_file)
+
+	list_helix = search_helix(pdb,ss)
+	get_inertie_mtx(list_helix)
+	helix_evec(list_helix)
+	output = open("angle.dat","w")
+	output.write("#Helix angle(degree)\n")
+	start = 1
+	for i in range(len(list_helix)):
+		axis1 = list_helix[i].eig_vec[:,0]
+		for j in range(start,len(list_helix)):
+			axis2 = list_helix[j].eig_vec[:,0]
+			axis1 = check_vec_sens(axis1,axis2)
+			angle = math.acos(axis1.dot(axis2))*57.3
+			print angle
+			output.write("%s-%s %.3f\n"%(list_helix[i].name,\
+			list_helix[j].name,angle))
+		start += 1
+	output.close()
+
+def PDBHelix_vs_helixBunble(pdb,limits_file = 0):
+	"""
+	Allows to compute the angle between an helix and the protein axis on a pdb 
+	file. 
+	Args : a pdb file and a limits file (optional)
+	Return : a file wich contain all the angle calculation
+	"""
+	if limits_file == 0:
+		ss = secondary_structure(pdb)
+	else:
+		ss = read_ss(limits_file)
+
+	list_helix = search_helix(pdb,ss)
+	get_inertie_mtx(list_helix)
+	helix_evec(list_helix)
+	hb_axis = helix_bundle_evec(list_helix)
+	output = open("prot_angle.dat","w")
+	output.write("#Helix angle(degree)\n")
+	axe1 = hb_axis[:,0]
+	i = 1
+	for helix in list_helix:
+		axe2 = helix.eig_vec[:,0]
+		angle = math.acos(axe1.dot(axe2))*57.3
+		output.write("%s-helix_bundle_axis %.3f\n"%(helix.name,angle))
+		i += 1
+	output.close()
+
+def PDBhelix_torsion_angle(pdb,limits_file = 0):
+	"""
+	Compute the torsion angle for helix wich is contact in a pdbfile
+	"""
+	if limits_file == 0:
+		ss = secondary_structure(pdb)
+	else:
+		ss = read_ss(limits_file)
+
+	list_helix = search_helix(sys.argv[1],ss)
+	get_inertie_mtx(list_helix)
+	helix_evec(list_helix)
+	contact = WichIsInContact(list_helix)
+
+
+	output = open("torsion_angle.dat","w")
+	output.write("#Helix torsion_angle(degree)\n")
+	start = 1
+	for i in range(len(list_helix)):
+		h1 = list_helix[i]
+		for j in range(start,len(list_helix)):
+			h2 = list_helix[j]
+			ang = "%s-%s"%(h1.name,h2.name)
+			if ang in contact:
+				angle = compute_torsion_angle(h1.eig_vec[:,0],\
+				h2.eig_vec[:,0],h1.ca_coord,h2.ca_coord)
+				output.write("%s-%s %.3f\n"%(h1.name,h2.name,angle))
+		start += 1
+	output.close()
+
+def MDhelix_vs_helix(top,traj,output = 0):
+	"""
+	Compute the helix - helix angle during a MD simulation. 
+	If output = "w", an output file is write.
+	Args : a topology, a trajectory file and an output (optional)
+	Return : a numpy matrix wich contain all angle and a list wich contain all
+	the combination of angle.
+	"""
+	last_frame,dir_name = get_pdb(top,traj)
+	#last_frame = 10001
+	row = 0
+	if output == "w":
+		output = open('results_helix_vs_helix.dat','w')
+
+	for i in range(last_frame):
+		print 'Compute helix-helix angle for frame : %i'%(i+1)
+		if i == 0:
+			ss = secondary_structure("%s/dssp_input.pdb"%dir_name)
+			list_helix = search_helix("%s/frame_1.pdb"%dir_name,ss)
+			results_mtx = mk_results_mtx(last_frame,list_helix)
+			names = header_hvsh(output,list_helix)
+
+
+		list_helix = search_helix("%s/frame_%i.pdb"%(dir_name,i+1),ss)
+		get_inertie_mtx(list_helix)
+		helix_evec(list_helix)
+
+		results_mtx,row = compute_hvsh(i,output,list_helix,results_mtx,row)
+
+	if output != 0:
+		output.close()
+
+	#os.system("rm -rf %s"%dir_name)
+	return results_mtx,names
+
+def MDhelix_vs_helixbundle(top,traj,output = 0):
+	"""
+	Compute the helix - helix bundle angle during a MD simulation. 
+	If output = "w", an output file is write.
+	Args : a topology, a trajectory file and an output (optional)
+	Return : a numpy matrix wich contain all angle and a list wich contain all
+	the combination of angle.
+	"""
+	last_frame,dir_name = get_pdb(top,traj)
+	row = 0
+	#last_frame = 10001
+	if output == "w":
+		output = open('results_helix_vs_helixbundle.dat','w')
+	for i in range(last_frame):
+		print 'Compute helix - helix bundle angle for frame : %i'%(i+1)
+		if i == 0:
+			ss = secondary_structure("%s/dssp_input.pdb"%dir_name)
+			list_helix = search_helix("%s/frame_1.pdb"%dir_name,ss)
+			results_mtx = np.zeros((last_frame,len(list_helix)))
+			names = header_hvshb(output,list_helix)
+
+		list_helix = search_helix("%s/frame_%i.pdb"%(dir_name,i+1),ss)
+		get_inertie_mtx(list_helix)
+		helix_evec(list_helix)
+		baxe = helix_bundle_evec(list_helix)
+		results_mtx,row =compute_hvshb(i,output,list_helix,baxe[:,0],\
+		results_mtx,row)
+	if output != 0:
+		output.close()
+	return results_mtx,names
+
+def MDhelix_torsion_angle(top,traj,output = 0):
+	last_frame,dirname = get_pdb(top,traj)
+	row = 0
+	if output == "w":	
+		output = open('results_helix_torsion_angle.dat','w')
+	for i in range(last_frame):
+		print 'Compute helix - helix torsion angle for frame : %i'%(i+1)
+		if i == 0:
+			ss = secondary_structure("%s/dssp_input.pdb"%dirname)
+
+		list_helix = search_helix("%s/frame_%i.pdb"%(dirname,i+1),ss)
+
+		if i == 0:
+			contact = WichIsInContact(list_helix)
+			results_mtx = np.zeros((last_frame,len(contact)))
+			if output != 0:
+				header_hta(output,contact)
+		get_inertie_mtx(list_helix)
+		helix_evec(list_helix)
+		evec_correction(list_helix)
+		results_mtx,row = compute_hta(i,output,list_helix,\
+		contact,results_mtx,row)
+	if output != 0:
+		output.close()
+
+	return results_mtx,contact
+
+#----------------------------PLOT-----------------------------------------------
+
+def plot_all(results_mtx,names,dir_name):
+	dir_name = mk_directory(dir_name)
+	col = results_mtx.shape[1]
+	for i in range(col):
+		val = results_mtx[:,i]
+		mean = np.mean(val)
+		plt.plot(range(len(val)),val,'.',color = "k")
+		plt.title("%s (mean angle = %.2f degree)"%(names[i],mean))
+		plt.ylabel("angle (degree)") 
+		plt.xlabel("Time step")
+		plt.axhline(y=mean, color = 'red')
+		plt.ylim((min(val)-10,max(val)+10))
+		plt.savefig("%s/plot_%s.png"%(dir_name,names[i]))
+		plt.clf()
+
+def plot_angle(angle,names,results_mtx):
+	col = "null"
+	for i in range(len(names)):
+		if names[i] == angle:
+			col = i
+
+	if col == "null":
+		sys.exit("ERROR : angle not find")
+
+	val = results_mtx[:,col]
+	mean = np.mean(val)
+	plt.plot(range(len(val)),val,'.',color = "k")
+	plt.title("%s (mean angle = %.2f degree)"%(names[i],mean))
+	plt.ylabel("angle (degree)") 
+	plt.xlabel("Time step")
+	plt.axhline(y=mean, color = 'red')
+	plt.ylim((min(val)-10,max(val)+10))
+	plt.savefig("plot_%s.png"%(angle))
+	plt.clf()
+
+
+PDBHelix_vs_helix(sys.argv[1])
