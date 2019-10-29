@@ -5,6 +5,9 @@
  ----------------------------------------------------------------------------
     		module_helix_angle.py (16-Sept-2015) 	version 1.00   
  ----------------------------------------------------------------------------
+ 
+ ![Alt text] (https://github.com/Moutoussamy/HelixAngle/blob/master/pictures/angle.png?raw=true)
+ 
  Copyright (c) Emmanuel Edouard MOUTOUSSAMY M2BI
 
  Contents
