@@ -15,7 +15,7 @@
  4. Contact
 
 
- 1. Introduction
+ ##Introduction
 -------------------
 This packages allow to determine differents angles between alpha-helix:
 	- Helix - helix angle
@@ -53,7 +53,7 @@ This packages contain 6 functions :
 	than 4.
 
 	
- 2. Necessary packages and software
+ ##Necessary packages and software
 -----------------------------------
 
 The necessary packages are :
@@ -76,7 +76,7 @@ Mac OSX-MAVERICK : pip install MDAnalysis
 !Caution : the mkdssp program is essential for some options !!!!
 http://pkgs.org/download/mkDSSP
 
- 5. Example
+ ##Example
 -----------------------------------
 the example file contain differents uses of this program. For run example.py, 
 Uncomment the lines that your want to test and type :
@@ -87,7 +87,7 @@ The data file contain :
 - a pdb file : 1H6I.pdb
 
 
- 6. Contact
+ ##Contact
 ---------------------------------
 For all questions or informations:
 e.e.moutoussamy@gmail.com
