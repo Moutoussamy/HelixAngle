@@ -85,9 +85,6 @@ Uncomment the lines that your want to test and type :
 
 The data file contain :
 - a pdb file : 1H6I.pdb
-If you want to use the MDs functions, you must complete  this file with
-a topology and a trajectory file. You can dowload these files on this link :
-http://www.dsimb.inserm.fr/~santuz/projet_court_helices/
 
 
  6. Contact
