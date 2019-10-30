@@ -1,7 +1,7 @@
 # HelixAngle
  Python module: Calculation of helices angle during a MD
 
-
+![](pictures/angle.png "logo" )
  ----------------------------------------------------------------------------
     		module_helix_angle.py (16-Sept-2015) 	version 1.00   
  ----------------------------------------------------------------------------
